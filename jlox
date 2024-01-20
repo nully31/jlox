@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+script_dir=$(dirname "$0")
+java -cp ${script_dir}/bin com.craftinginterpreters.lox.Lox $@
