@@ -1,4 +1,10 @@
 #!/usr/bin/bash
 
 script_dir=$(dirname "$0")
-java -cp ${script_dir}/bin com.craftinginterpreters.lox.Lox $@
+tool_gen_ast=gen_ast
+
+if [ "$1" = "$tool_gen_ast" ]; then
+    java -cp ${script_dir}/bin com.craftinginterpreters.tool.GenerateAst $2
+else
+    java -cp ${script_dir}/bin com.craftinginterpreters.lox.Lox $@
+fi

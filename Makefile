@@ -1,16 +1,22 @@
 # Makefile for jlox
 
-SRCDIR := src/com/craftinginterpreters/lox
+PACKAGESRCDIR := src/com/craftinginterpreters
+LOXDIR := $(PACKAGESRCDIR)/lox
+TOOLDIR := $(PACKAGESRCDIR)/tool
 BINDIR := bin
 
-SOURCES := $(wildcard $(SRCDIR)/*.java)
+LOXSOURCES := $(wildcard $(LOXDIR)/*.java)
+TOOLSOURCES := $(wildcard $(TOOLDIR)/*.java)
 
-TARGET := jlox
 CLASSPATH := $(BINDIR)
 
-all: $(TARGET)
+all: jlox tool
 
-$(TARGET): $(SOURCES)
+jlox: $(LOXSOURCES)
+	@ mkdir -p $(BINDIR)
+	javac -d $(BINDIR) -cp $(CLASSPATH) $^
+
+tool: $(TOOLSOURCES)
 	@ mkdir -p $(BINDIR)
 	javac -d $(BINDIR) -cp $(CLASSPATH) $^
 
