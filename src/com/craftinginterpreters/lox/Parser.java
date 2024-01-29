@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.craftinginterpreters.lox.TokenType.*;
@@ -43,13 +44,58 @@ class Parser {
     }
 
     private Stmt statement() {
-        // statement -> exprStmt | ifStmt | printStmt | whileStmt | block ;
+        // statement -> exprStmt | forStmt | ifStmt | printStmt | whileStmt | block ;
+        if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt forStatement() {
+        // forStatement -> "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement ;
+        consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+        Stmt initializer;
+        if (match(SEMICOLON)) {
+            initializer = null;
+        } else if (match(VAR)) {
+            initializer = varDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
+
+        Expr condition = null;
+        if (!check(SEMICOLON)) {
+            condition = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after loop condition.");
+
+        Expr increment = null;
+        if (!check(RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+        Stmt body = statement();
+
+        // Desuger a for loop statement into a while loop one.
+        // First, the increment (if there is one) executes after the body in each iteration of the loop.
+        if (increment != null) {
+            body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+        }
+
+        // Next, take the condition and the body and build a primitive while loop with them.
+        if (condition != null) body = new Stmt.While(condition, body);
+
+        // Finally if there is an initializer, it runs once before the entire loop,
+        // by replacing the whole statement with a block that runs the initializer and then executes the loop.
+        if (initializer != null) {
+            body = new Stmt.Block(Arrays.asList(initializer, body));
+        }
+
+        return body;
     }
 
     private Stmt ifStatement() {
@@ -75,7 +121,7 @@ class Parser {
     }
 
     private Stmt varDeclaration() {
-        // varDecl -> "var" IDENTIFIER ( "=" expression)? ";" ;
+        // varDecl -> "var" IDENTIFIER ( "=" expression )? ";" ;
         Token name = consume(IDENTIFIER, "Expect variable name.");
 
         Expr initializer = null;
