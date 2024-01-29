@@ -16,7 +16,7 @@ class Parser {
     }
 
     List<Stmt> parse() {
-        // program -> statement* EOF ;
+        // program -> declaration* EOF ;
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
             statements.add(declaration());
@@ -31,6 +31,7 @@ class Parser {
     }
 
     private Stmt declaration() {
+        // declaration -> varDecl | statement ;
         try {
             if (match(VAR)) return varDeclaration();
 
@@ -73,6 +74,7 @@ class Parser {
     }
 
     private Stmt varDeclaration() {
+        // varDecl -> "var" IDENTIFIER ( "=" expression)? ";" ;
         Token name = consume(IDENTIFIER, "Expect variable name.");
 
         Expr initializer = null;
@@ -85,12 +87,14 @@ class Parser {
     }
 
     private Stmt expressionStatement() {
+        // statement -> exprStmt ;
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
     }
 
     private List<Stmt> block() {
+        // blockStmt -> "{" declaration* "}" ;
         List<Stmt> statements = new ArrayList<>();
 
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
@@ -294,6 +298,7 @@ class Parser {
                 case PRINT:
                 case RETURN:    
                     return;
+                default:
             }
         }
 
