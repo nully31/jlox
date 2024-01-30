@@ -260,14 +260,43 @@ class Parser {
     }
 
     private Expr unary() {
-        // unary -> ( "!" | "-" ) unary | primary ;
+        // unary -> ( "!" | "-" ) unary | call ;
         if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expr finishCall(Expr callee) {
+        // arguments -> expression ( "," expression )* ;
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                arguments.add(expression());
+            } while (match(COMMA));
+        }
+
+        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
+    }
+
+    private Expr call() {
+        // call -> primary ( "(" arguments? ")" )* ;
+        Expr expr = primary();
+
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+
+        return expr;
     }
 
     private Expr primary() {
