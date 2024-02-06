@@ -8,10 +8,6 @@ BINDIR := bin
 LOXSOURCES := $(wildcard $(LOXDIR)/*.java)
 TOOLSOURCES := $(wildcard $(TOOLDIR)/*.java)
 
-# This should be temporary
-EXCLUDE := $(LOXDIR)/AstPrinter.java
-LOXSOURCES := $(filter-out $(EXCLUDE), $(LOXSOURCES))
-
 CLASSPATH := $(BINDIR)
 
 all: jlox
