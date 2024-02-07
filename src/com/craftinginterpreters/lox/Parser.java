@@ -124,6 +124,7 @@ class Parser {
     }
 
     private Stmt returnStatement() {
+        // "return" expression? ";" ;
         Token keyword = previous();
         Expr value = null;
         if (!check(SEMICOLON)) {
