@@ -341,12 +341,15 @@ class Parser {
     }
 
     private Expr call() {
-        // call -> primary ( "(" arguments? ")" )* ;
+        // call -> primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
         Expr expr = primary();
 
         while (true) {
             if (match(LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(DOT)) {
+                Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }
